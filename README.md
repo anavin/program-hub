@@ -49,7 +49,7 @@ npm run dev
    ```
 2. รัน SQL (ตามลำดับ) ที่ Supabase → **SQL Editor**:
    - [`supabase/00_shared.sql`](supabase/00_shared.sql) — ของกลาง (`public.profiles`, `public.app_members`, helper) **รันครั้งเดียวต่อ project**
-   - [`supabase/10_program_hub.sql`](supabase/10_program_hub.sql) — schema `program_hub` (programs, hub_settings, audit_log) + RLS + seed 16 โปรแกรม
+   - [`supabase/10_program_hub.sql`](supabase/10_program_hub.sql) — schema `program_hub` (programs, hub_settings, audit_log) + RLS + Storage bucket `hub-logos` + seed 16 โปรแกรม
 3. **สำคัญ:** Supabase → **Settings → API → Exposed schemas** → เพิ่ม `program_hub` (ไม่งั้น client เรียกตารางไม่ได้)
 4. สร้างผู้ใช้: Supabase → **Authentication → Users → Add user** (ระบบสร้าง `profiles` อัตโนมัติ)
 5. ตั้งสิทธิ์ **ต่อแอป** ใน `app_members` (admin/แผนก) — รันใน SQL Editor:

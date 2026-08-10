@@ -25,6 +25,8 @@ import {
   saveHubSettingsAction,
 } from "@/app/actions";
 import Qr from "./Qr";
+import { getBrowserSupabase } from "@/lib/supabase/client";
+import { HAS_SUPABASE } from "@/lib/config";
 
 type Health = { ok: boolean; ms: number; note: string } | "loading";
 const FAV_KEY = "hub-favorites";
@@ -330,7 +332,7 @@ export default function Hub({
     });
   }
 
-  // อ่านไฟล์รูปเป็น data URL (สำหรับอัปโหลดโลโก้)
+  // อ่านไฟล์รูปเป็น data URL (โหมด mock ที่ไม่มี Supabase Storage)
   function readImage(file: File, onDone: (dataUrl: string) => void) {
     if (file.size > 400 * 1024) {
       alert("ไฟล์ใหญ่เกิน 400KB — กรุณาย่อรูปก่อน");
@@ -339,6 +341,32 @@ export default function Hub({
     const reader = new FileReader();
     reader.onload = () => onDone(String(reader.result || ""));
     reader.readAsDataURL(file);
+  }
+
+  // อัปโหลดโลโก้: มี Supabase → เก็บใน Storage (คืน public URL); ไม่มี → data URL (mock)
+  async function uploadLogo(file: File, folder: string, onDone: (url: string) => void) {
+    if (!HAS_SUPABASE) {
+      readImage(file, onDone);
+      return;
+    }
+    if (file.size > 1_000_000) {
+      alert("ไฟล์ใหญ่เกิน 1MB — กรุณาย่อรูปก่อน");
+      return;
+    }
+    try {
+      const sb = getBrowserSupabase();
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `${folder}/${Date.now()}-${Math.round(Math.random() * 1e6)}.${ext}`;
+      const { error } = await sb.storage.from("hub-logos").upload(path, file, {
+        contentType: file.type || "image/png",
+        upsert: true,
+      });
+      if (error) throw error;
+      const { data } = sb.storage.from("hub-logos").getPublicUrl(path);
+      onDone(data.publicUrl);
+    } catch (e) {
+      alert("อัปโหลดไม่สำเร็จ: " + (e instanceof Error ? e.message : "ลองใหม่อีกครั้ง"));
+    }
   }
 
   const avatarLetter = (user.name || "?").trim()[0] ?? "?";
@@ -785,7 +813,7 @@ export default function Hub({
                         style={{ display: "none" }}
                         onChange={(e) => {
                           const f = e.target.files?.[0];
-                          if (f) readImage(f, (url) => setForm((cur) => ({ ...cur, logoUrl: url })));
+                          if (f) uploadLogo(f, "programs", (url) => setForm((cur) => ({ ...cur, logoUrl: url })));
                         }}
                       />
                     </label>
@@ -796,7 +824,7 @@ export default function Hub({
                     )}
                   </div>
                 </div>
-                <div className="hint">อัปโหลดโลโก้จริง (≤400KB) หรือเลือก emoji</div>
+                <div className="hint">อัปโหลดโลโก้จริง (≤1MB, เก็บใน Supabase Storage) หรือเลือก emoji</div>
               </div>
               <div className="field">
                 <label>ลิงก์ (URL) — ใส่ได้หลายอัน</label>
@@ -959,11 +987,11 @@ export default function Hub({
                       )}
                       <label className="btn" style={{ cursor: "pointer" }}>
                         🖼️ อัปโหลด
-                        <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => { const f = e.target.files?.[0]; if (f) readImage(f, setHubLogo); }} />
+                        <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadLogo(f, "hub", setHubLogo); }} />
                       </label>
                       {hubLogo && <button className="btn" type="button" onClick={() => setHubLogo("")}>ลบโลโก้</button>}
                     </div>
-                    <div className="hint">โลโก้ ≤400KB — แสดงมุมซ้ายบนของ Hub</div>
+                    <div className="hint">โลโก้ ≤1MB (เก็บใน Storage) — แสดงมุมซ้ายบนของ Hub</div>
                   </div>
                 </>
               ) : (

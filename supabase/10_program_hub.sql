@@ -102,6 +102,24 @@ drop policy if exists audit_insert on program_hub.audit_log;
 create policy audit_insert on program_hub.audit_log
   for insert with check (public.has_role('program_hub', 'admin'));
 
+-- ── Storage: โลโก้โปรแกรม/องค์กร (แทนการเก็บ base64 ใน DB) ──
+insert into storage.buckets (id, name, public)
+values ('hub-logos', 'hub-logos', true)
+on conflict (id) do nothing;
+
+drop policy if exists hublogos_read on storage.objects;
+create policy hublogos_read on storage.objects
+  for select using (bucket_id = 'hub-logos');
+drop policy if exists hublogos_write on storage.objects;
+create policy hublogos_write on storage.objects
+  for insert with check (bucket_id = 'hub-logos' and public.has_role('program_hub', 'admin'));
+drop policy if exists hublogos_update on storage.objects;
+create policy hublogos_update on storage.objects
+  for update using (bucket_id = 'hub-logos' and public.has_role('program_hub', 'admin'));
+drop policy if exists hublogos_delete on storage.objects;
+create policy hublogos_delete on storage.objects
+  for delete using (bucket_id = 'hub-logos' and public.has_role('program_hub', 'admin'));
+
 -- ── seed 16 โปรแกรม ──
 insert into program_hub.programs (name, description, category, icon, status, visibility, owner, note, links, sort) values
   ('Lab Parfumo PO Pro', 'ระบบใบสั่งซื้อ + รับของ + งบประมาณ ครบวงจร', 'ปฏิบัติการ', '📦', 'ok', 'all', 'ทีมจัดซื้อ', '', '[{"label":"หลัก","url":"#"},{"label":"คู่มือ","url":"#"}]', 10),
