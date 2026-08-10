@@ -47,22 +47,22 @@ npm run dev
    NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
    ```
-2. รัน SQL: เปิด Supabase → **SQL Editor** → วางเนื้อหาไฟล์ [`supabase/schema.sql`](supabase/schema.sql) แล้ว Run
-   (สร้างตาราง `programs` + `profiles` + `hub_settings` + `audit_log` + RLS + seed 16 โปรแกรม)
-3. สร้างผู้ใช้: Supabase → **Authentication → Users → Add user** (ใส่อีเมล/รหัส)
-   ระบบจะสร้างแถวใน `profiles` อัตโนมัติ (role เริ่มต้น = `user`)
-4. ตั้งใครเป็นแอดมิน — รันใน SQL Editor:
+2. รัน SQL (ตามลำดับ) ที่ Supabase → **SQL Editor**:
+   - [`supabase/00_shared.sql`](supabase/00_shared.sql) — ของกลาง (`public.profiles`, `public.app_members`, helper) **รันครั้งเดียวต่อ project**
+   - [`supabase/10_program_hub.sql`](supabase/10_program_hub.sql) — schema `program_hub` (programs, hub_settings, audit_log) + RLS + seed 16 โปรแกรม
+3. **สำคัญ:** Supabase → **Settings → API → Exposed schemas** → เพิ่ม `program_hub` (ไม่งั้น client เรียกตารางไม่ได้)
+4. สร้างผู้ใช้: Supabase → **Authentication → Users → Add user** (ระบบสร้าง `profiles` อัตโนมัติ)
+5. ตั้งสิทธิ์ **ต่อแอป** ใน `app_members` (admin/แผนก) — รันใน SQL Editor:
    ```sql
-   update public.profiles set role = 'admin'
-   where id = (select id from auth.users where email = 'you@labparfumo.com');
+   insert into public.app_members (user_id, app, role, dept)
+   values ((select id from auth.users where email = 'you@labparfumo.com'),
+           'program_hub', 'admin', 'ส่วนกลาง')
+   on conflict (user_id, app) do update set role = excluded.role, dept = excluded.dept;
    ```
-   ตั้งแผนก (ให้เห็นโปรแกรมที่จำกัดแผนก):
-   ```sql
-   update public.profiles set department = 'การตลาด'
-   where id = (select id from auth.users where email = 'someone@labparfumo.com');
-   ```
-5. `npm run dev` แล้วล็อกอินด้วยผู้ใช้ Supabase จริง
+6. `npm run dev` แล้วล็อกอินด้วยผู้ใช้ Supabase จริง
 
+> **ใช้ Supabase ร่วมหลายแอป:** รัน `00_shared.sql` ครั้งเดียว แล้วแต่ละแอปมี schema ของตัวเอง (`program_hub`, `po`, …) + ตั้ง `db.schema` ใน client · สิทธิ์แยกต่อแอปที่ `app_members` · ดูแผนภาพ/รายละเอียดในแชต
+>
 > โปรเจกต์นี้ **รัน migration มือ** — แก้ schema เมื่อไหร่ต้องรัน SQL บน Supabase เองทุกครั้ง
 
 ---
@@ -80,7 +80,9 @@ npm run dev
 
 ```
 program-hub/
-├─ supabase/schema.sql        # ตาราง + RLS + seed
+├─ supabase/
+│  ├─ 00_shared.sql           # ของกลาง (profiles + app_members + helper) — 1 ครั้ง/project
+│  └─ 10_program_hub.sql      # schema program_hub + RLS + seed
 ├─ src/
 │  ├─ app/
 │  │  ├─ page.tsx             # หน้า hub (server: ดึงข้อมูล + กรองสิทธิ์)

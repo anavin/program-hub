@@ -9,6 +9,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config";
 export function getServerSupabase() {
   const cookieStore = cookies();
   return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    db: { schema: "program_hub" },
     cookies: {
       getAll() {
         return cookieStore.getAll();

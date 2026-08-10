@@ -24,18 +24,23 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  // role จากตาราง profiles (ค่าเริ่มต้น = user)
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, full_name, department")
-    .eq("id", user.id)
-    .maybeSingle();
+  // ชื่อ + สิทธิ์ต่อแอปอยู่ที่ schema public (client default = program_hub จึง override ด้วย .schema)
+  const pub = supabase.schema("public");
+  const [{ data: profile }, { data: member }] = await Promise.all([
+    pub.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+    pub
+      .from("app_members")
+      .select("role, dept")
+      .eq("user_id", user.id)
+      .eq("app", "program_hub")
+      .maybeSingle(),
+  ]);
 
   return {
     email: user.email ?? "",
     name: profile?.full_name || user.email?.split("@")[0] || "ผู้ใช้",
-    role: (profile?.role as Role) === "admin" ? "admin" : "user",
-    department: profile?.department || "",
+    role: (member?.role as Role) === "admin" ? "admin" : "user",
+    department: member?.dept || "",
   };
 }
 
