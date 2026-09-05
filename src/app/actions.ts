@@ -30,7 +30,7 @@ export async function signInAction(
 
 export async function signOutAction(): Promise<void> {
   await signOut();
-  redirect("/login");
+  redirect("/");
 }
 
 // ── Program CRUD (admin only) ───────────────────────────

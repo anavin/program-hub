@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { useFormState, useFormStatus } from "react-dom";
 import {
   CATEGORIES,
   DEPARTMENTS,
@@ -20,6 +21,7 @@ import {
   deleteProgramAction,
   saveNotesAction,
   signOutAction,
+  signInAction,
   trackOpenAction,
   checkHealthAction,
   saveHubSettingsAction,
@@ -40,6 +42,15 @@ function fmtWhen(iso: string) {
 }
 
 const CHIP_CATS = ["ทั้งหมด", ...CATEGORIES];
+
+function LoginSubmit() {
+  const { pending } = useFormStatus();
+  return (
+    <button className="btn btn-primary" type="submit" disabled={pending} style={{ justifyContent: "center", padding: 11, width: "100%" }}>
+      {pending ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ"}
+    </button>
+  );
+}
 
 function hostOf(url: string) {
   try {
@@ -97,12 +108,14 @@ export default function Hub({
   hub,
   audit,
 }: {
-  user: SessionUser;
+  user: SessionUser | null;
   programs: Program[];
   hub: HubSettings;
   audit: AuditEntry[];
 }) {
-  const isAdmin = user.role === "admin";
+  const isAdmin = user?.role === "admin";
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [loginState, loginAction] = useFormState(signInAction, { error: null as string | null });
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("ทั้งหมด");
   const [view, setView] = useState<"grid" | "list">("grid");
@@ -218,7 +231,7 @@ export default function Hub({
       text,
       kind: noteKind,
       at: new Date().toISOString(),
-      by: user.name,
+      by: user?.name ?? "แอดมิน",
     };
     persistNotes([note, ...notes]);
     setNoteText("");
@@ -398,7 +411,7 @@ export default function Hub({
     }
   }
 
-  const avatarLetter = (user.name || "?").trim()[0] ?? "?";
+  const avatarLetter = (user?.name || "?").trim()[0] ?? "?";
 
   return (
     <div onClick={() => setOpenMenu(null)}>
@@ -438,7 +451,7 @@ export default function Hub({
             {isAdmin && (
               <button className="icon-btn" onClick={() => { setHubName(hub.name); setHubLogo(hub.logoUrl); setSettingsTab("general"); setSettingsOpen(true); }} title="ตั้งค่า Hub" type="button">⚙️</button>
             )}
-            <div className="fontsize-ctl" title="ปรับขนาดตัวอักษร">
+            <div className="fontsize-ctl" title="ปรับขนาดตัวอักษร (สำหรับทุกคน)">
               <button className="fs-btn" onClick={() => bumpFont(-0.1)} title="เล็กลง" type="button" disabled={fontScale <= 0.85}>A−</button>
               <button className="fs-btn fs-reset" onClick={resetFont} title="ขนาดปกติ" type="button">{Math.round(fontScale * 100)}%</button>
               <button className="fs-btn" onClick={() => bumpFont(0.1)} title="ใหญ่ขึ้น" type="button" disabled={fontScale >= 1.4}>A+</button>
@@ -446,16 +459,22 @@ export default function Hub({
             <button className="icon-btn" onClick={toggleTheme} title="สลับธีม" type="button">
               {theme === "dark" ? "☀️" : "🌙"}
             </button>
-            <div className="user-pill">
-              <div className="avatar">{avatarLetter}</div>
-              <div className="user-meta">
-                <div className="user-name">{user.name}</div>
-                <div className="user-role">{(isAdmin ? "ผู้ดูแลระบบ" : "พนักงาน") + (user.department ? ` · ${user.department}` : "")}</div>
-              </div>
-            </div>
-            <form action={signOutAction}>
-              <button className="icon-btn" title="ออกจากระบบ" type="submit">🚪</button>
-            </form>
+            {user ? (
+              <>
+                <div className="user-pill">
+                  <div className="avatar">{avatarLetter}</div>
+                  <div className="user-meta">
+                    <div className="user-name">{user.name}</div>
+                    <div className="user-role">{(isAdmin ? "ผู้ดูแลระบบ" : "พนักงาน") + (user.department ? ` · ${user.department}` : "")}</div>
+                  </div>
+                </div>
+                <form action={signOutAction}>
+                  <button className="icon-btn" title="ออกจากระบบ" type="submit">🚪</button>
+                </form>
+              </>
+            ) : (
+              <button className="btn btn-primary" onClick={() => setLoginOpen(true)} type="button">🔐 เข้าสู่ระบบ</button>
+            )}
           </div>
         </div>
       </header>
@@ -1049,6 +1068,33 @@ export default function Hub({
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Login modal (ไม่มีหน้า login แยก) ── */}
+      {loginOpen && !user && (
+        <div className="modal-bg" onClick={() => setLoginOpen(false)}>
+          <div className="modal" style={{ maxWidth: 400 }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <h3>🔐 เข้าสู่ระบบเพื่อแก้ไข</h3>
+              <button className="icon-btn" onClick={() => setLoginOpen(false)} type="button">✕</button>
+            </div>
+            <form action={loginAction}>
+              <div className="modal-body">
+                {loginState.error && <div className="login-err">⚠️ {loginState.error}</div>}
+                <div className="field">
+                  <label>อีเมล</label>
+                  <input name="email" type="email" placeholder="you@labparfumo.com" autoComplete="email" required />
+                </div>
+                <div className="field">
+                  <label>รหัสผ่าน</label>
+                  <input name="password" type="password" placeholder="••••••••" autoComplete="current-password" required />
+                </div>
+                <LoginSubmit />
+                <div className="hint" style={{ marginTop: 4 }}>เข้าเฉพาะแอดมิน — คนทั่วไปดูได้เลยไม่ต้องล็อกอิน</div>
+              </div>
+            </form>
           </div>
         </div>
       )}
