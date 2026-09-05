@@ -31,16 +31,16 @@ const SEED_DEPTS: Record<string, string[]> = {
 
 const RAW: Omit<Program, "notes" | "claudeUrl" | "logoUrl" | "depts" | "openCount">[] = [
   // ── ระบบหลัก ─────────────────────────────────────────────
-  { id: "po-pro", name: "Lab Parfumo PO Pro", description: "ระบบใบสั่งซื้อ + รับของ + งบประมาณ ครบวงจร", category: "ปฏิบัติการ", icon: "📦", status: "ok", visibility: "all", owner: "ทีมจัดซื้อ", note: "", sort: 10, links: [{ label: "หลัก", url: "#" }, { label: "คู่มือ", url: "#" }] },
-  { id: "central", name: "ระบบใบเบิกกลาง", description: "ใบเบิกของ + dashboard รวม สำหรับทุกแผนก", category: "ปฏิบัติการ", icon: "🧾", status: "ok", visibility: "all", owner: "ส่วนกลาง", note: "", sort: 20, links: [{ label: "หลัก", url: "#" }] },
-  { id: "stock", name: "ระบบสต๊อกวัตถุดิบ", description: "จัดการสต๊อกน้ำหอม/วัตถุดิบ", category: "ปฏิบัติการ", icon: "🧴", status: "warn", visibility: "all", owner: "คลังสินค้า", note: "อยู่ระหว่างย้ายฐานข้อมูล", sort: 30, links: [{ label: "หลัก", url: "#" }] },
+  { id: "po-pro", name: "Lab Parfumo PO Pro", description: "ระบบใบสั่งซื้อ + รับของ + งบประมาณ ครบวงจร", category: "ปฏิบัติการ", icon: "📦", status: "ok", visibility: "all", owner: "ทีมจัดซื้อ", note: "ต้องล็อกอินก่อนใช้งาน", sort: 10, links: [{ label: "เปิด", url: "https://lab-parfumo-next.vercel.app" }] },
+  { id: "central", name: "ระบบใบเบิกกลาง (CTW)", description: "ใบเบิกของ + dashboard รวม สำหรับทุกแผนก", category: "ปฏิบัติการ", icon: "🧾", status: "ok", visibility: "all", owner: "ส่วนกลาง", note: "", sort: 20, links: [{ label: "เปิด", url: "https://lab-parfumo-central.vercel.app" }] },
+  { id: "stock", name: "ระบบสต๊อกวัตถุดิบ (STOCK)", description: "จัดการสต๊อกน้ำหอม/วัตถุดิบ", category: "ปฏิบัติการ", icon: "🧴", status: "ok", visibility: "all", owner: "คลังสินค้า", note: "", sort: 30, links: [{ label: "เปิด", url: "https://labparfumo-stock.vercel.app" }] },
 
   // ── ขาย ─────────────────────────────────────────────────
   { id: "sales-mobile", name: "หน้าพนักงานขาย /my", description: "หน้าเบิก/สั่งของสำหรับมือถือ ใช้งานหน้างาน", category: "ขาย", icon: "📱", status: "ok", visibility: "all", owner: "ทีมขาย", note: "ออกแบบสำหรับมือถือ", sort: 40, links: [{ label: "หลัก", url: "#" }] },
   { id: "sales-guide", name: "คู่มือพนักงานขาย", description: "คู่มือขั้นตอนการขาย + ข้อมูลสินค้า (เว็บเพจ)", category: "ขาย", icon: "📝", status: "ok", visibility: "all", owner: "ทีมขาย", note: "", sort: 50, links: [{ label: "เปิดคู่มือ", url: "https://claude.ai/code/artifact/59ca78f8-8f03-4b4a-8861-f026a8f1c314" }] },
 
   // ── การตลาด ─────────────────────────────────────────────
-  { id: "content-os", name: "Content OS", description: "Marketing dashboard รวม Meta · GA4 · YouTube · TikTok", category: "การตลาด", icon: "📈", status: "ok", visibility: "admin", owner: "ทีมการตลาด", note: "", sort: 60, links: [{ label: "หลัก", url: "#" }] },
+  { id: "content-os", name: "Content OS", description: "Marketing dashboard รวม Meta · GA4 · YouTube · TikTok", category: "การตลาด", icon: "📈", status: "ok", visibility: "admin", owner: "ทีมการตลาด", note: "", sort: 60, links: [{ label: "เปิด", url: "https://content-os-zeta-flax.vercel.app" }] },
 
   // ── รายงาน ──────────────────────────────────────────────
   { id: "budget", name: "ระบบงบประมาณ", description: "ติดตามงบรายหมวด + เปรียบเทียบแผน/จริง", category: "รายงาน", icon: "💰", status: "ok", visibility: "admin", owner: "บัญชี", note: "", sort: 70, links: [{ label: "หลัก", url: "#" }] },
@@ -56,9 +56,25 @@ const RAW: Omit<Program, "notes" | "claudeUrl" | "logoUrl" | "depts" | "openCoun
 
   // ── อื่นๆ / โปรเจกต์แยก ─────────────────────────────────
   { id: "bhrc-registry", name: "BHRC Research Registry", description: "ระบบทะเบียนงานวิจัย + คู่มือ PI (เว็บ HTML)", category: "อื่นๆ", icon: "🧪", status: "ok", visibility: "all", owner: "BHRC", note: "ไฟล์ HTML ในเครื่อง ~/Desktop/BHRC-Registry", sort: 160, links: [{ label: "เปิด", url: "#" }] },
+  { id: "nwm74", name: "NWM74", description: "เว็บแอป NWM74 (แก้คำอธิบายได้ในโหมดแอดมิน)", category: "อื่นๆ", icon: "🌐", status: "ok", visibility: "all", owner: "—", note: "", sort: 165, links: [{ label: "เปิด", url: "https://nwm74.vercel.app" }] },
+
+  // ── ปฏิบัติการ (เพิ่มเติม) ──────────────────────────────
+  { id: "platform-withdrawals", name: "ระบบเบิกสินค้าแยกแพลตฟอร์ม", description: "เบิกสินค้าคลังกลาง (Shopee ฯลฯ) + พิมพ์ใบเบิก/บาร์โค้ด + นับสต๊อก", category: "ปฏิบัติการ", icon: "🚚", status: "ok", visibility: "all", owner: "คลังสินค้า", note: "", sort: 32, links: [{ label: "หลัก", url: "#" }] },
+  { id: "overtime", name: "ระบบลงโอที (OT)", description: "บันทึก/สรุปชั่วโมงโอทีของพนักงาน", category: "ปฏิบัติการ", icon: "⏱️", status: "ok", visibility: "all", owner: "HR", note: "", sort: 34, links: [{ label: "เปิด", url: "https://ot-seven-beryl.vercel.app" }] },
+
+  // ── การตลาด/ขาย (เพิ่มเติม) ──────────────────────────────
+  { id: "labparfumo-site", name: "เว็บไซต์ labparfumo.com", description: "หน้าร้านออนไลน์ (WordPress/WooCommerce)", category: "การตลาด", icon: "🌐", status: "ok", visibility: "all", owner: "การตลาด", note: "", sort: 62, links: [{ label: "เปิดเว็บ", url: "https://labparfumo.com" }] },
+
+  // ── รายงาน/บัญชี (เพิ่มเติม) ─────────────────────────────
+  { id: "petty-cash", name: "PrettyCash (เงินสดย่อย)", description: "แทนไฟล์ Excel เงินสดย่อย + ปิดรอบบัตรค่ายิงแอด", category: "รายงาน", icon: "💵", status: "ok", visibility: "admin", owner: "บัญชี", note: "ต้องล็อกอิน", sort: 75, links: [{ label: "เปิด", url: "https://prettycash.vercel.app/login" }] },
+
+  // ── เครื่องมือ (เพิ่มเติม) ────────────────────────────────
+  { id: "excise-tax", name: "ดึงยอดภาษีสรรพสามิต (ภส.07-02)", description: "ดึงยอด (๑๐.๑) จาก PDF เติมเทมเพลตยื่นภาษี", category: "เครื่องมือ", icon: "🧾", status: "ok", visibility: "admin", owner: "บัญชี", note: "", sort: 145, links: [{ label: "เปิด", url: "#" }] },
 
   // ── ผู้ดูแลระบบ ─────────────────────────────────────────
   { id: "docs", name: "ศูนย์เอกสาร & กฎหมาย", description: "สัญญา เอกสารบริษัท และเทมเพลตต่างๆ", category: "ผู้ดูแลระบบ", icon: "🗂️", status: "ok", visibility: "admin", owner: "ธุรการ", note: "", sort: 150, links: [{ label: "หลัก", url: "#" }] },
+  { id: "program-hub-self", name: "Program Hub", description: "พอร์ทัลรวมโปรแกรมทั้งหมด (หน้านี้เอง)", category: "ผู้ดูแลระบบ", icon: "🧭", status: "ok", visibility: "admin", owner: "ส่วนกลาง", note: "", sort: 152, links: [{ label: "หลัก", url: "#" }] },
+  { id: "app-starter", name: "App Starter (แม่แบบ)", description: "โครงมาตรฐานสร้างแอปใหม่ (Next.js + Supabase)", category: "ผู้ดูแลระบบ", icon: "🔷", status: "ok", visibility: "admin", owner: "dev", note: "GitHub template", sort: 154, links: [{ label: "GitHub", url: "https://github.com/anavin/app-starter" }] },
 ];
 
 /**

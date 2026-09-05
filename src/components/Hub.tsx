@@ -110,6 +110,35 @@ export default function Hub({
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState<"default" | "popular">("default");
 
+  // ขนาดตัวอักษร (ขยาย/ลด) — zoom ทั้งหน้า เก็บใน localStorage
+  const [fontScale, setFontScale] = useState(1);
+  useEffect(() => {
+    let s = 1;
+    try {
+      s = parseFloat(localStorage.getItem("hub-fontscale") || "1") || 1;
+    } catch {}
+    s = Math.min(1.4, Math.max(0.85, s));
+    setFontScale(s);
+    document.documentElement.style.setProperty("zoom", String(s));
+  }, []);
+  function bumpFont(delta: number) {
+    setFontScale((cur) => {
+      const next = Math.min(1.4, Math.max(0.85, Math.round((cur + delta) * 100) / 100));
+      document.documentElement.style.setProperty("zoom", String(next));
+      try {
+        localStorage.setItem("hub-fontscale", String(next));
+      } catch {}
+      return next;
+    });
+  }
+  function resetFont() {
+    setFontScale(1);
+    document.documentElement.style.setProperty("zoom", "1");
+    try {
+      localStorage.setItem("hub-fontscale", "1");
+    } catch {}
+  }
+
   // favorites (เก็บใน localStorage ต่อเครื่อง/ต่อคน)
   const [favs, setFavs] = useState<string[]>([]);
   useEffect(() => {
@@ -409,6 +438,11 @@ export default function Hub({
             {isAdmin && (
               <button className="icon-btn" onClick={() => { setHubName(hub.name); setHubLogo(hub.logoUrl); setSettingsTab("general"); setSettingsOpen(true); }} title="ตั้งค่า Hub" type="button">⚙️</button>
             )}
+            <div className="fontsize-ctl" title="ปรับขนาดตัวอักษร">
+              <button className="fs-btn" onClick={() => bumpFont(-0.1)} title="เล็กลง" type="button" disabled={fontScale <= 0.85}>A−</button>
+              <button className="fs-btn fs-reset" onClick={resetFont} title="ขนาดปกติ" type="button">{Math.round(fontScale * 100)}%</button>
+              <button className="fs-btn" onClick={() => bumpFont(0.1)} title="ใหญ่ขึ้น" type="button" disabled={fontScale >= 1.4}>A+</button>
+            </div>
             <button className="icon-btn" onClick={toggleTheme} title="สลับธีม" type="button">
               {theme === "dark" ? "☀️" : "🌙"}
             </button>
